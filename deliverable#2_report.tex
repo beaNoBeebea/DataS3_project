@@ -1,0 +1,485 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{graphicx}   % images
+\usepackage{fancyhdr}   % headers/footers
+\usepackage{tcolorbox}
+\usepackage{listings}
+\usepackage{xcolor}
+\lstdefinestyle{SQLstyle}{
+    language=SQL,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{gray},
+    stringstyle=\color{teal},
+    showstringspaces=false,
+    frame=single,
+    breaklines=true,
+    captionpos=b,
+    tabsize=2,
+    morekeywords={CREATE, DATABASE, TABLE, PRIMARY, KEY, FOREIGN, REFERENCES, NOT, NULL, UNIQUE, ENUM, ON, DELETE, CASCADE, USE, INSERT, INTO, VALUES, JOIN}
+}
+\usepackage{hyperref}
+ 
+\geometry{margin=1in}
+
+% ---------- Header ----------
+\setlength{\headheight}{55pt}  
+\setlength{\headsep}{25pt}     
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhf{}
+\fancyhead[L]{\includegraphics[width=0.18\textwidth, keepaspectratio]{Figures/UM6Plogo.png}}
+\fancyhead[R]{\includegraphics[width=0.18\textwidth, keepaspectratio]{Figures/CC.jpg}}
+\fancyfoot[L]{Data Management Lab}
+\fancyfoot[R]{Prof. Karima Echihabi}
+\fancyfoot[C]{Page \thepage}
+\setlength{\footskip}{50pt}
+\geometry{margin=1in}
+% ---------- Deliverable Template ----------
+\begin{document}
+\thispagestyle{empty}
+\begin{center}
+  \includegraphics[width=0.25\textwidth]{Figures/UM6Plogo.png}\hfill
+  \includegraphics[width=0.25\textwidth]{Figures/CC.jpg}
+  \vspace{1.2cm}
+
+  {\LARGE \textbf{Deliverable \#2: MNHS database conceptual design}}\\[0.6cm]
+  {\large \textbf{Data Management Course}}\\[0.2cm]
+  {\large UM6P College of Computing}\\[0.8cm]
+
+  {\normalsize \textbf{Professor:} Karima Echihabi \quad 
+   \textbf{Program:} Computer Engineering}\\[0.1cm]
+  {\normalsize \textbf{Session:} Fall 2025}\\[1cm]
+
+  \rule{0.9\textwidth}{0.5pt}\\[0.5cm]
+  {\large \textbf{Team Information}} \\[0.3cm]
+  \begin{tabular}{|l|l|}
+    \hline
+    \textbf{Team Name} & Groupe2 \\ \hline
+    \textbf{Member 1}  & Abir Fakhreddine  \\ \hline
+    \textbf{Member 2}  & Malak El Assali   \\ \hline
+    \textbf{Member 3}  & Nada El Farissi   \\ \hline
+    \textbf{Member 4}  & Amine Chrif  \\ \hline
+    \textbf{Member 5}  & Anass Fertat  \\ \hline
+    \textbf{Member 6}  & Yasser Hallou  \\ \hline
+    \textbf{Repository Link} & \texttt{https://github.com/beaNoBeebea} \\ \hline
+  \end{tabular}
+  \rule{0.9\textwidth}{0.5pt}\\
+\end{center}
+\clearpage
+\pagestyle{fancy}
+
+% ---------- Sections for Students ----------
+\section{Introduction}
+The MNHS needs a database to manage its different entities (patients, staff, hospitals, departments, appointments, prescriptions, medications, insurance, billing, emergencies, etc.) and the different interactions between them. Our work consists of transforming the conceptual schema of the MNHS database into a logical relational model by defining the tables, attributes, primary, and foreign keys, as well as finding ways to implement integrity constraints and discussing when not possible.
+
+\section{Requirements}
+In this deliverable, we represent the database in a relational model, discuss the constraints that could not be represented, provide some SQL code snippets and experiment with our database through a query. 
+
+The relational model will include tables representing all of the database's entities such as \textbf{Staff}, \textbf{Contact\_location}, \textbf{Hospital}, \textbf{Department} and \textbf{Clinical\_Activity}. Every table must have a primary key and contain all attributes of its entity with the right data types.
+
+The relational model should also represent all relationships, whether it is a Many-To-Many, a One-To-Many or a One-To-One relationship between entities.
+
+The constraints that could not be represented will also be mentioned, detailing the issues faced.
+
+The relational schema is implemented in SQL, ensuring that all tables, constraints, and relationships are properly defined. In addition, the required query is implemented, and its corresponding output is presented to validate the functionality of the relational model.
+
+  
+\section{Methodology}
+We started off with the conversion of all entities (\textbf{Patient, Staff, Hospital, Department, Clinical\_Activity}, etc.) into tables with their primary key and appropriate attributes with their data types.
+    
+The hierarchy of the \textbf{Staff} entity (\textbf{Practitioner}, \textbf{Caregiving\_Staff}, and \textbf{Technical\_Staff}) was represented by putting a foreign key referencing the superclass in each of the subclasses.
+
+The hierarchy of the \textbf{Clinical\_Activity} entities (\textbf{Appointment} and \textbf{Emergency}) by putting a foreign key referencing the superclass in each of the subclasses.
+
+The Many-To-Many relationships were represented by creating tables with as a primary key the tuple composed of the two primary keys of the two entities participating in the relationship. Taking as an example the \textbf{Has\_Contact\_Location} relationship with a primary key composed of the primary key of the \textbf{Patient} entity and the \textbf{Contact\_Location} entity. (other examples: \textbf{Insurance\_Covers}, \textbf{Include\_Medication}, \textbf{Stock}..)
+
+The One-To-Many relationships were represented by putting foreign keys referencing the "one" side of the relationship in the "many" side of the relationship. Let's take as an example the relationship between \textbf{Department} and \textbf{Hospital} which was modeled by referencing \textbf{Hospital} using a foreign key in the \textbf{Department} entity.
+
+Representing the One-To-One relationships by referencing one of the two entities in the other using a foreign key as is the case of the relationship Generates between \textbf{Clinical\_Activity} and \textbf{Expense}, since we put \textbf{Clinical\_Activity}'s primary key as a foreign key in \textbf{expense}.
+
+As for the total participation constraints, we encountered some issues that will be discussed in detail in the Discussion section.
+
+\section{Implementation \& Results}
+
+\section*{Relational Schema}
+
+
+\subsection*{Entities}
+
+
+\quad \textbf{Patient}(\underline{IID}: integer, \textit{Name}: string, \textit{Sex}: string, \textit{Birth}: date, \textit{Blood\_Group}: string, \textit{CIN}: string, \textit{Phone}: string)
+\begin{itemize}
+    \item IID is the PRIMARY KEY
+    \item CIN is unique (by design as a national ID, but also enforced by a database constraint)
+    \item Name is NOT NULL
+    \item Sex is NOT NULL and restriced to values 'M' and 'F'
+    \item Blood\_Group is restricted to values: 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'
+\end{itemize}
+
+\bigskip
+
+\textbf{Contact\_Location}(\underline{CLID}: string, \textit{city}: string, \textit{province}: string, \textit{street}: string, \textit{number}: integer, \textit{postal\_code}: string, \textit{phone\_number}: string)
+\begin{itemize}
+    \item CLID is the PRIMARY KEY
+\end{itemize}
+
+\bigskip
+
+\textbf{Hospital}(\underline{HID}: string, \textit{Name}: string, \textit{City}: string, \textit{Region}: string)
+\begin{itemize}
+    \item HID is the PRIMARY KEY
+    \item Name is NOT NULL
+\end{itemize}
+
+\bigskip
+
+\textbf{Department}(\underline{DEP\_ID}: string, \textit{Name}: string, \textit{Specialty}: string, \textit{HID}: string)
+\begin{itemize}
+    \item DEP\_ID is the PRIMARY KEY
+    \item HID is a FOREIGN KEY referencing Hospital(HID)
+    \item HID is NOT NULL, as it enforces a one-to-many relationship: every department must belong to exactly one hospital. The NOT NULL constraint ensures referential integrity in the one-to-many relationship.
+\end{itemize}
+
+\bigskip
+
+\textbf{Staff}(\underline{STAFF\_ID}: string, \textit{Name}: string, \textit{status}: string)
+\begin{itemize}
+    \item STAFF\_ID is the PRIMARY KEY
+    \item Name is NOT NULL
+    \item This is the parent table in an ISA hierarchy
+\end{itemize}
+
+\medskip
+
+\quad \textit{Practitioner}(\underline{STAFF\_ID}: string, \textit{License\_Number}: string, \textit{Specialty}: string)
+\begin{itemize}
+    \item STAFF\_ID is both the PRIMARY KEY and a FOREIGN KEY referencing Staff(STAFF\_ID)
+    \item This is a child table of the previous one
+\end{itemize}
+
+\medskip
+
+\quad \textit{Caregiving}(\underline{STAFF\_ID}: string, \textit{Grade}: string, \textit{Ward}: string)
+\begin{itemize}
+    \item STAFF\_ID is both the PRIMARY KEY and a FOREIGN KEY referencing Staff(STAFF\_ID)
+    \item This is a child table of the previous one
+\end{itemize}
+
+\medskip
+
+\quad \textit{Technical}(\underline{STAFF\_ID}: string, \textit{Modality}: string, \textit{Certifications}: string)
+\begin{itemize}
+    \item STAFF\_ID is both the PRIMARY KEY and a FOREIGN KEY referencing Staff(STAFF\_ID)
+    \item This is a child table of the previous one
+\end{itemize}
+
+\bigskip
+
+\textbf{Insurance}(\underline{InsID}: string, \textit{Type}: string)
+\begin{itemize}
+    \item InsID is the PRIMARY KEY
+    \item Domain: \textit{Type} in \{CNOPS, CNSS, RAMED, private\}.
+\end{itemize}
+
+\bigskip
+
+\textbf{Clinical\_Activity} (\underline{CAID}: string, \textit{Date}: date, \textit{Time}: time, \textit{DEP\_ID}: string, \textit{STAFF\_ID}: string, \textit{IID}: string, \textit{EX\_ID}: string)
+\begin{itemize}
+    \item CAID is the PRIMARY KEY
+    
+    \item DEP\_ID is a FOREIGN KEY referencing Department(DEP\_ID)
+    \item STAFF\_ID is a FOREIGN KEY referencing Staff(STAFF\_ID)
+    \item IID is a FOREIGN KEY referencing Patient(IID)
+    \item EX\_ID is a FOREIGN KEY referencing Expense(EX\_ID)
+    \item A clinical activity occurs in exactly one department, so DEP\_ID is NOT NULL
+    \item A clinical activity is linked to exactly one staff member, so STAFF\_ID is NOT NULL
+    \item A clinical activity has exactly one patient, so IID is NOT NULL
+    \item A clinical activity generates exactly one expense, so EX\_ID is NOT NULL
+    \item Additional note: Clinical\_Activity is in a one-to-one relationship with Expense, and the lack of correct modelization of this relationship will be discussed later on
+    \item Finally, Clinical\_Activity is the parent entity to an ISA hierarchy
+\end{itemize}
+
+\medskip
+
+\quad \textit{Appointment}(\underline{CAID}: string, \textit{Reason}: string, \textit{Outcome}: string, \textit{Status}: string)
+\begin{itemize}
+    \item An appointment is a clinical activity.
+    \item Domain: \textit{Status} $\in \{Scheduled, Completed, Cancelled\}$.
+    \item CAID is a FOREIGN KEY referencing Clinical\_Activity(CAID), and is also the relation's PRIMARY KEY, as this is a child entity to Clinical\_Activity
+\end{itemize}
+
+\medskip
+
+\quad \textit{Emergency}(\underline{CAID}: string, \textit{Triage\_Level}: string, \textit{Outcome}: string) % Added: Outcome attribute
+\begin{itemize}
+    \item An emergency is a clinical activity.
+    \item CAID is a FOREIGN KEY referencing Clinical\_Activity(CAID), and is also the relation's PRIMARY KEY, as this is a child entity to Clinical\_Activity
+\end{itemize}
+
+\bigskip
+
+\textbf{Expense}(\underline{EX\_ID}: string, \textit{Total}: decimal, \textit{InsID}: string)
+ \begin{itemize}    
+      \item Each expense is generated by exactly one clinical activity.
+      \item Each expense is attached to at least one insurance.
+      \item InsID is a FOREIGN KEY referencing Insurance(InsID), it is NOT NULL, as Expense and Insurance are in a one-to-many relationship
+      \item As mentionned previously, Clinical Activity and Expense are in a relationship. So, the logical representation would be to add a foreign key referencing Clinical\_Activity here as well. However, this would put us in a "chicken or egg" dilemma, as we couldn't create any of two relation instances from these relations without first creating the other. So, this is a constraint we can't represent with the tools we currently have.
+\end{itemize}
+
+\bigskip
+
+\textbf{Prescription}(\underline{PID}: string, \textit{Date\_Issued}: date, \textit{CAID}: string)
+\begin{itemize}
+    \item A prescription is generated by exactly one clinical activity.
+    \item CAID is a FOREIGN KEY referencing Clinical\_Activity(CAID). It is UNIQUE and NOT NULL, as every Prescription is linked to exactly one Clinical\_Activity, and each Clinical\_Activity is linked to at most one Clinical\_Activity.
+\end{itemize}
+
+
+
+\bigskip
+
+\textbf{Medication}(\underline{DrugID}: string, \textit{Name}: string, \textit{Class}: string, \textit{Form}: string, \textit{Strength}: string, \textit{Active\_Ingredient}: string, \textit{Manufacturer}: string)
+\begin{itemize}
+    \item DrugID is the PRIMARY KEY
+\end{itemize}
+
+\subsection*{Relationships}
+
+\subsubsection*{One-to-Many Relationships}
+
+Foreign keys in Department, Clinical\_Activity, and Prescription represent one-to-many relationships.
+
+\subsubsection*{Many-to-Many Relationships}
+
+\quad \textbf{Has\_Contact\_Location}(\underline{IID}: string, \underline{CLID}: string)
+\begin{itemize}
+    \item (CLID,IID) is the PRIMARY KEY 
+    \item IID is a FOREIGN KEY referencing Patient(IID)
+    \item CLID is a FOREIGN KEY referencing Contact\_Location(CLID)
+\end{itemize}
+
+
+\bigskip
+
+\textbf{Insurance\_Covers}(\underline{InsID}: string, \underline{IID}: string)
+\begin{itemize}
+    \item (InsID,IID) is the PRIMARY KEY 
+    \item IID is a FOREIGN KEY referencing Patient(IID)
+    \item InsID is a FOREIGN KEY referencing Insurance(InsID)
+\end{itemize}
+
+\bigskip
+
+\textbf{Include\_Medication}(\underline{PID}: string, \underline{DrugID}: string, \textit{dosage}: decimal, \textit{duration}: integer)
+\begin{itemize}
+    \item (PID,DrugID) is the PRIMARY KEY 
+    \item PID is a FOREIGN KEY referencing Prescription(PID)
+    \item DrugID is a FOREIGN KEY referencing Medication(DrugID)
+\end{itemize}
+
+\bigskip
+
+\textbf{Stock}(\underline{DrugID}: string, \underline{HID}: string, \textit{Stock\_Timestamp}: datetime, \textit{Qty}: integer, \textit{Unit\_Price}: decimal, \textit{Reorder\_Level}: integer)
+\begin{itemize}
+    \item (HID,DrugID) is the PRIMARY KEY 
+    \item HID is a FOREIGN KEY referencing Hospital(HID)
+    \item DrugID is a FOREIGN KEY referencing Medication(DrugID)
+\end{itemize}
+
+\bigskip
+
+\textbf{Work\_In}(\underline{STAFF\_ID}: string, \underline{DEP\_ID}: string)
+\begin{itemize}
+    \item (STAFF\_ID,DEP\_ID) is the PRIMARY KEY 
+    \item STAFF\_ID is a FOREIGN KEY referencing Staff(STAFF\_ID)
+    \item DEP\_ID is a FOREIGN KEY referencing Department(DEP\_ID)
+    \item This relationship has a total participation constraint on the side of Staff, this cannot be represented with the tools we currently possess, as we cannot prove that somehow every single instance of Staff exists in at least one instance of Work\_In
+\end{itemize}
+
+\bigskip
+
+\subsection{Partial Implementation of the Relational Schema in SQL}
+
+
+\begin{lstlisting}[language=SQL]
+
+
+CREATE DATABASE LAB3;
+USE LAB3;
+
+
+CREATE TABLE Patient (
+	IID INT PRIMARY KEY,
+    CIN CHAR(11) UNIQUE,
+    Name VARCHAR(50) NOT NULL,
+    Sex ENUM('M', 'F') NOT NULL,
+    Birth DATE,
+    Bloodgroup ENUM('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'),
+    Phone VARCHAR(20)
+);
+
+
+CREATE TABLE Hospital(
+	HID CHAR(11) PRIMARY KEY,
+	Name VARCHAR(50) NOT NULL,
+	City VARCHAR(50),
+	Region VARCHAR(50)
+);
+
+
+CREATE TABLE Department(   
+    DEP_ID CHAR(11) PRIMARY KEY,
+    Name VARCHAR(50) NOT NULL,
+    Speciality VARCHAR(50),
+    HID CHAR(11) NOT NULL,  -- ONE-TO-MANY
+    FOREIGN KEY (HID) REFERENCES Hospital(HID)
+);
+
+
+CREATE TABLE Staff (
+  STAFF_ID CHAR(11) PRIMARY KEY,
+  Name VARCHAR(100) NOT NULL,
+  status VARCHAR(20)
+);
+
+
+CREATE TABLE Insurance (
+  InsID CHAR(11) PRIMARY KEY,
+  Type VARCHAR(50)
+);
+
+
+CREATE TABLE Expense (
+  EX_ID CHAR(11) PRIMARY KEY,
+  TOTAL DECIMAL,
+  InsID CHAR(11) NOT NULL, -- ONE-TO-MANY
+  /* -EXPENSE IS IN A ONE-TO-ONE RELATIONSHIP WITH CLINICAL 
+  ACTIVITY, SO, LOGICALLY, WE SHOULD ADD A NOT NULL REFERENCE
+  -TO CLINICAL ACTIVITY HERE AS WELL, THIS HOWEVER CREATES AN EGG AND 
+  CHICKEN PROBLEM SO WE ABSTAIN*/
+  FOREIGN KEY (InsID) REFERENCES Insurance(InsID)
+);
+
+
+CREATE TABLE Clinical_Activity (
+  CAID CHAR(11) PRIMARY KEY,
+  Date DATE,
+  Time TIME,
+  DEP_ID CHAR(11) NOT NULL,
+  STAFF_ID CHAR(11) NOT NULL,
+  EX_ID CHAR(11) NOT NULL,
+  IID INT NOT NULL,
+  FOREIGN KEY (DEP_ID) REFERENCES Department(DEP_ID),
+  FOREIGN KEY (STAFF_ID) REFERENCES Staff(STAFF_ID) ,
+  FOREIGN KEY (IID) REFERENCES Patient(IID),
+  FOREIGN KEY (EX_ID) REFERENCES Expense(EX_ID)
+);
+
+
+CREATE TABLE Appointment(
+  CAID CHAR(11) PRIMARY KEY,
+  Status VARCHAR(50), 
+  Reason VARCHAR(50),
+  FOREIGN KEY (CAID) REFERENCES Clinical_Activity(CAID)
+  ON DELETE CASCADE   
+);
+
+
+INSERT INTO Patient VALUES
+(1, 'CIN001', 'Aymane Tahiri', 'M', '2003-06-15', 'A+', '0612345678'),
+(2, 'CIN002', 'Sara El Fassi', 'F', '1999-03-21', 'B-', '0623456789'),
+(3, 'CIN003', 'Youssef Idrissi', 'M', '1988-11-02', 'O+', '0634567890');
+INSERT INTO Hospital VALUES
+('H1', 'Mohammed VI Hospital', 'Benguerir', 'Marrakech-Safi'),
+('H2', 'Avicenne Hospital', 'Casablanca', 'Casablanca-Settat'),
+('H3', 'CHU Rabat', 'Rabat', 'Rabat-Sale-Kenitra');
+
+
+INSERT INTO Department VALUES
+('D1', 'Cardiology', 'Heart', 'H1'),
+('D2', 'Neurology', 'Brain', 'H2'),
+('D3', 'Orthopedics', 'Bones', 'H3');
+
+
+INSERT INTO Staff VALUES
+('S1', 'Dr. Amina Rahimi', 'Active'),
+('S2', 'Dr. Karim El Mansouri', 'Active'),
+('S3', 'Dr. Yasmine Berrada', 'Active');
+
+
+INSERT INTO Insurance VALUES
+('I1', 'Basic'),
+('I2', 'Premium'),
+('I3', 'VIP');
+
+
+INSERT INTO Expense VALUES
+('E1', 100, 'I1'),
+('E2', 200, 'I2'),
+('E3', 150, 'I3');
+
+
+INSERT INTO Clinical_Activity VALUES
+('CA1', '2025-10-12', '10:00:00', 'D1', 'S1', 'E1', 1),
+('CA2', '2025-10-13', '11:30:00', 'D2', 'S2', 'E2', 2),
+('CA3', '2025-10-14', '09:15:00', 'D3', 'S3', 'E3', 3);
+
+
+INSERT INTO Appointment VALUES
+('CA1', 'Scheduled', 'Routine check-up'),
+('CA2', 'Completed', 'MRI follow-up'),
+('CA3', 'Scheduled', 'Knee pain consultation');
+
+\end{lstlisting}
+
+
+\subsection{SQL Query Experimentation}
+To validate part of the relational schema implementation, we executed a query that lists the name of patients with scheduled appointments in the city of Benguerir.
+
+\begin{lstlisting}[language=SQL]
+SELECT p.Name AS Patient_Name
+FROM Patient p
+JOIN Clinical_Activity ca ON p.IID = ca.IID
+JOIN Department d ON ca.DEP_ID = d.DEP_ID
+JOIN Hospital h ON d.HID = h.HID
+JOIN Appointment a ON ca.CAID = a.CAID
+WHERE h.City = 'Benguerir' AND a.Status = 'Scheduled';
+\end{lstlisting}
+
+\subsection{Query Output and Interpretation}
+
+The output below represents the result of executing the above query on the MNHS database.
+
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/query_output.png}
+    \caption{Result of the SQL query showing the name of patients with scheduled appointments in the city of Benguerir}
+    \label{fig:sql_output}
+\end{figure}
+
+\section{Discussion}
+The main challenges we faced were the following:
+
+\begin{itemize}
+
+\item The representation of the total participation constraint. 
+For example in the \textbf{Works\_in} relationship we have total 
+participation of the \textbf{Staff} entity, however we could only represent
+the fact that it's a many-to-many relationship by creating a new table for 
+the relationship without modeling the fact that a \textbf{Staff} member
+must work in at least one \textbf{Department}.
+
+\item Another challenge is the representation of the one-to-one relationship \textbf{Generates} between \textbf{Clinical\_Activity} and \textbf{Expense}.   
+Logically, we could add a foreign key in both entities. However, doing so creates a circular dependency also called the "chicken or egg" dilemma. We cannot insert one without the other already existing.
+This restriction cannot be fully represented with the tools currently available.
+Therefore, only one foreign key (from \textbf{Expense} to \textbf{Clinical\_Activity}) is implemented, enforcing only the fact that every \textbf{Expense} is linked to exactly one \textbf{Clinical\_Activity}.
+\end{itemize}
+
+\section{Conclusion}
+The relational design developed throughout this work models at best the entities, attributes, and relationships of the MNHS database enforcing primary and foreign key constraints to preserve referential integrity. The relational schema was implemented in SQL, and the required queries were executed to validate the correctness of the model. 
+
+Some semantic constraints, such as total participation and mutually dependent one-to-one relationships, could not be fully represented within the limits of the tools currently available. Nevertheless, the final schema provides a consistent and functional structure that accurately reflects the original ER model. 
+
+\end{document}
