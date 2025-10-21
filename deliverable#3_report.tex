@@ -1,0 +1,528 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{graphicx}   % images
+\usepackage{fancyhdr}   % headers/footers
+\usepackage{tcolorbox}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\geometry{margin=1in}
+\usepackage{stix}
+\usepackage{xcolor}
+\usepackage{listings}
+\lstset{language=SQL,
+  basicstyle=\ttfamily\small,
+  keywordstyle=\color{blue},
+  commentstyle=\color{green},
+  stringstyle=\color{red},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  breaklines=true
+}
+
+
+% ---------- Header ----------
+\setlength{\headheight}{36pt}
+\setlength{\headsep}{18pt}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhf{}
+\fancyhead[L]{\includegraphics[width=0.13\textwidth, keepaspectratio]{Figures/UM6Plogo.png}}
+\fancyhead[R]{\includegraphics[width=0.13\textwidth, keepaspectratio]{Figures/CC.jpg}}
+\fancyfoot[L]{Data Management Lab}
+\fancyfoot[R]{Prof. Karima Echihabi}
+\fancyfoot[C]{Page \thepage}
+
+% ---------- Deliverable Template ----------
+\begin{document}
+\thispagestyle{empty}
+\begin{center}
+  \includegraphics[width=0.25\textwidth]{Figures/UM6Plogo.png}\hfill
+  \includegraphics[width=0.25\textwidth]{Figures/CC.jpg}
+  \vspace{1.2cm}
+
+  {\LARGE \textbf{Deliverable \#4: Relational Algebra, SQL and Functional Dependencies}}\\[0.6cm]
+  {\large \textbf{Data Management Course}}\\[0.2cm]
+  {\large UM6P College of Computing}\\[0.8cm]
+
+  {\normalsize \textbf{Professor:} Karima Echihabi \quad 
+   \textbf{Program:} Computer Engineering}\\[0.1cm]
+  {\normalsize \textbf{Session:} Fall 2025}\\[1cm]
+
+  \rule{0.9\textwidth}{0.5pt}\\[0.5cm]
+  {\large \textbf{Team Information}} \\[0.3cm]
+  \begin{tabular}{|l|l|}
+    \hline
+    \textbf{Team Name} & Groupe2 \\ \hline
+    \textbf{Member 1}  & Abir Fakhreddine   \\ \hline
+    \textbf{Member 2}  & Malak El Assali   \\ \hline
+    \textbf{Member 3}  & Nada El Farissi  \\ \hline
+    \textbf{Member 4}  & Amine Chrif   \\ \hline
+    \textbf{Member 5}  & Anass Fertat   \\ \hline
+    \textbf{Member 6}  & Yasser Hallou  \\ \hline
+    \textbf{Repository Link} & \texttt{https://github.com/beaNoBeebea} \\ \hline
+  \end{tabular}
+  \rule{0.9\textwidth}{0.5pt}\\
+\end{center}
+\clearpage
+\pagestyle{fancy}
+
+% ---------- Sections for Students ----------
+\section{Introduction} 
+\quad After transforming the MNHS conceptual schema into a relational model by defining tables, attributes, primary keys,
+and foreign keys, the next step is to identify and state the functional dependencies (FDs).\newline 
+Clear FDs reduce redundancy, enforce integrity, and improve efficiency. Without them, the schema is prone to anomalies;
+for example, storing the same medication in multiple rows and updating only one creates an update anomaly. By specifying the correct FDs,
+we ensure that each fact is stored in exactly one place and that any change propagates consistently. \newline
+With this foundation in place, we can then express queries over MNHS in Relational Algebra and translate them into SQL.
+
+\section{Requirements}
+\quad In this deliverable, we are required to state, for each table in the MHNS relational model, the functional dependencies. Additionally, we are required to describe, theoretically, how the data will be retrieved and manipulated within the relational model for each query (using relational algebra), before moving on to the actual implementation in a real database using SQL.\newline
+This approach shows that the requirements are both analytical and practical. The analytical part involves identifying functional dependencies and describing queries using relational algebra, which provides a theoretical understanding of the data and its relationships. The practical part consists of translating these parts into SQL, ensuring that the analytical part is correct.
+\section{Methodology}
+\quad We choose to begin with Functional dependencies , showing how each attribute or a set of them can determine another.
+\textcolor{red}{As for the primary keys dependencies we did not specify them since it is trivial that it implicitly determines
+all the other attributes as well as the fact that each attribute determines itself, and each relation determines itself as well}. Therefore we focused only on the non-trivial 
+functional dependencies. \textcolor{red}{Entities without relevant dependencies were omitted}.\newline Usually, we would have experts, or the client guide us on the FDS, but as this is not available, we had to rely on our common sense to derive FDs\newline
+We expressed each query using both Relational Algebra and SQL. For Relational Algebra we used standard operators such as :\begin{itemize}
+\item \textbf{Selection} ($\sigma$): Chooses rows from a relation that satisfy a specified condition.
+\item \textbf{Projection} ($\pi$): Chooses specific columns (attributes) from a relation.
+\item \textbf{Join} ($\bowtie$): Combines rows from two or more relations based on a common attribute or condition.
+\item \textbf{Grouping/Aggregation} ($\gamma$): Groups rows by one or more attributes and computes aggregate values (for example, SUM, or AVG) for each group.
+\item \textbf{Rename} ($\rho$): Renames a relation or its attributes to avoid ambiguity or to make expressions clearer in complex queries.
+\end{itemize} to describe how to retrieve data theoretically. For SQL we translated the standard operators into syntax
+that can be run on actual databases.
+
+
+\section{Implementation \& Results}
+\subsection{Functional dependencies:}
+\textbf{Trivial dependencies:} primary keys determine the whole relation, superkeys determine the whole relation, and each attribute determines itself.
+
+\begin{itemize}
+    \item \textbf{Entity:} ContactLocation\newline
+    \textbf{Primary key:} CLID \newline
+    \textbf{Attributes:} Street, Number, City, Province, PostalCode, Phone.
+    \item \textbf{Functional dependency:}\newline
+    Postalcode $\rightarrow$ City,Province
+    \item \textbf{Entity:} Patient\newline
+    \textbf{Primary key:} IID
+    \textbf{Attributes:} CIN, Name, Sex, Birth, BloodGroup, Phone.
+    \item \textbf{Functional dependency:}\newline
+    CIN $\rightarrow$ IID (and subsequently the whole relation, Name, Sex, Birth, BloodGroup, Phone)
+    \item \textbf{Entity:} Staff \newline
+     \textbf{Primary key:} STAFF ID
+     \textbf{Attributes:} Name, Status.\newline
+     \textbf{ISA subtypes:}\newline
+     \textbf{Practitioner:} LicenseNumber, Specialty.\newline
+     \textbf{Caregiving:} Grade, Ward.\newline
+     \textbf{Technical:} Certifications, Modality.
+     \item \textbf{Functional dependency:} \newline
+     \textbf{LicenseNumber} $\rightarrow$ STAFF ID, Name, Status, Specialty (partial FD)
+     \item \textbf{Entity:}
+     \textbf{Hospital} \newline
+     \textbf{Primary key:} HID\newline
+     \textbf{Attributes:} Name, City, Region.
+     \item \textbf{Functional dependency:}\newline
+     City $\rightarrow$ Region
+     \item \textbf{Entity:} Medication\newline
+     \textbf{Primary key:} DrugID \newline
+     \textbf{Attributes:} Name, Form, Strength, Manufacturer, Class, ActiveIngredient.
+     \item \textbf{Functional dependency:} \newline
+     Name $\rightarrow$ Form, Strength, Manufacturer, Class, ActiveIngredient.
+\end{itemize}
+
+% -------------------------------------------------------------
+
+
+\subsection{Queries:}
+\begin{enumerate} 
+
+\item \textbf{Find the names of patients who have had at least one clinical activity handled by active staff:}
+\[
+\pi_{\text{Name}}(
+Patient \bowtie_{\text{IID}}  (Clinical\_activity \bowtie_{\text{staff\_ID}}(\sigma_{\text{status='active'}}(Staff)))
+)
+\]
+
+\begin{lstlisting}
+SELECT Name  
+FROM 
+Patient P
+JOIN
+Clinical_activity C
+ON 
+P.IID=C.IID
+JOIN 
+Staff S
+ON 
+S.staff_ID =C.staff_ID
+WHERE 
+status='active'
+\end{lstlisting}
+
+% -------------------------------------------------------------
+
+
+\item \textbf{Find Staff IDs of staff who are either 'Active' or have issued at least one prescription:}
+
+\[
+\pi_{\text{staff\_ID}}((Clinical\_activity \bowtie_{\text{CAID}} Prescription)\cup (\sigma_{\text{status='active'}}(Staff)))
+\]
+
+
+\begin{lstlisting}    
+SELECT staff_ID FROM Staff WHERE status='active'
+UNION 
+SELECT staff_ID FROM Clinical_Activity C JOIN Prescription P ON P.CAID=C.CAID 
+\end{lstlisting}
+
+% -------------------------------------------------------------
+
+
+\item \textbf{Find Hospital IDs of hospitals located in 'Benguerir' or having at least one department with the specialty 'Cardiology':}
+\[
+\begin{aligned}
+&\pi_{\text{HID}}\!\big(\sigma_{\text{city}='Benguerir'}(\text{Hospital})\big)\\[6pt]
+&\cup\\[6pt]
+&\pi_{\text{HID}}\!\big(\text{Hospital}\ \bowtie_{\text{HID}}\ 
+  (\sigma_{\text{specialty}='Cardiology'}(\text{Department})\big))
+\end{aligned}
+\]
+
+
+
+\begin{lstlisting}
+SELECT H.HID
+FROM Hospital AS H
+WHERE H.city = 'Benguerir'
+UNION
+SELECT DISTINCT H.HID
+FROM Hospital AS H
+JOIN Department AS D
+  ON D.HID = H.HID
+WHERE D.specialty = 'Cardiology';
+\end{lstlisting}
+
+% -------------------------------------------------------------
+
+
+\item  \textbf{Find Hospital IDs of hospitals that have both 'Cardiology' and 'Pediatrics' departments.}
+
+\[\pi_{HID}({\sigma_{name='Cardiology'}(Department)})\cap\pi_{HID}(\sigma_{name='Pediatrics'}(Department))\]
+
+\begin{lstlisting}
+SELECT HID
+FROM Department
+WHERE name IN ('Cardiology','Pediatrics')
+GROUP BY HID
+HAVING COUNT(DISTINCT name) = 2;
+
+\end{lstlisting}
+
+
+% -------------------------------------------------------------
+
+
+\item \textbf{Find staff members who have worked in every department of the hospital with HID = 1.}
+
+\[R1 = \pi_{Dep\_ID}(\sigma_{HID=1}(Department))\]
+\[R2 = \pi_{STAFF\_ID,Dep\_ID}(Work\_in)\]
+So the desired result is $R=R2/R1$
+
+\begin{lstlisting}
+SELECT STAFF_ID
+FROM Work_in
+WHERE Dep_ID IN (
+    SELECT Dep_ID
+    FROM Department
+    WHERE HID = 1
+)
+GROUP BY STAFF_ID
+HAVING COUNT(DISTINCT Dep_ID) = (
+    SELECT COUNT(*)
+    FROM Department
+    WHERE HID = 1
+);
+\end{lstlisting}
+
+
+
+% -------------------------------------------------------------
+
+
+\item \textbf{Find staff members who participated in every clinical activity of the department with DEP ID =2.}
+\[R1 = \pi_{CAID}(\sigma_{Dep\_ID=2}(ClinicalActivity))\]
+\[R2 = \pi_{STAFF\_ID,CAID}(ClinicalActivity)\]
+So the desired result is $R=R2/R1$
+
+\begin{lstlisting}
+SELECT STAFF_ID
+FROM ClinicalActivity
+WHERE Dep_ID = 2
+GROUP BY STAFF_ID
+HAVING COUNT(DISTINCT CAID) = (
+  SELECT COUNT(DISTINCT CAID)
+  FROM ClinicalActivity
+  WHERE Dep_ID = 2
+);
+\end{lstlisting}
+
+% -------------------------------------------------------------
+
+
+\item \textbf{Find pairs of staff members $(s_1, s_2)$ such that $s_1$ has handled more clinical activities than $s_2$.}
+\[\rho(R, \; \gamma_{STAFF\_ID; \; COUNT(CAID) \rightarrow n}(Staff \leftouterjoin ClinicalActivity)) \]
+\[\rho(R1(STAFF\_ID \rightarrow s1, n \rightarrow n1), \; R)\]
+\[\rho(R2(STAFF\_ID \rightarrow s2, n \rightarrow n2), \; R)\]
+\[\pi_{s1, s2}(\sigma_{n1 > n2}(R1 \times R2))\]
+
+\begin{lstlisting}
+SELECT R1.STAFF_ID AS s1,
+    R2.STAFF_ID AS s2
+FROM (
+    SELECT S.STAFF_ID, COUNT(CA.CAID) AS n
+    FROM Staff AS S 
+    LEFT JOIN ClinicalActivity AS CA
+        ON S.STAFF_ID = CA.STAFF_ID
+    GROUP BY S.STAFF_ID
+) AS R1,
+(
+    SELECT S.STAFF_ID, COUNT(CA.CAID) AS n
+    FROM Staff AS S 
+    LEFT JOIN ClinicalActivity AS CA
+        ON S.STAFF_ID = CA.STAFF_ID
+    GROUP BY S.STAFF_ID
+) AS R2
+WHERE R1.n > R2.n;
+\end{lstlisting}
+
+% -------------------------------------------------------------
+
+
+\item \textbf{Find Patient IDs of patients who had clinical activities with at least two different staff members.}
+\[\pi_{IID}(\sigma_{n \geq 2}(\gamma_{IID; \; COUNT(STAFF\_ID) \rightarrow n}(\pi_{IID, \; STAFF\_ID}(ClinicalActivity))))\]
+
+\begin{lstlisting}
+SELECT R1.IID
+FROM (
+    SELECT R2.IID, COUNT(R2.STAFF_ID) AS n
+    FROM (
+        SELECT DISTINCT CA.IID, CA.STAFF_ID
+        FROM ClinicalActivity AS CA
+    ) AS R2
+    GROUP BY R2.IID
+) AS R1
+WHERE R1.N >= 2;
+\end{lstlisting}
+
+
+% -------------------------------------------------------------
+
+
+\item \textbf{Find CAIDs of clinical activities performed in September 2025 at hospitals located in 'Benguerir'.}
+\[\rho(R, \; ClinicalActivity \bowtie_{DEP\_ID} Department \bowtie_{HID} Hospital)\]
+\[\pi_{CAID}(\sigma_{City='Benguerir' \; \wedge \; Date \geq '2025-09-01' \; \wedge \; Date < '2025-10-01'}(R))\]
+
+\begin{lstlisting}
+SELECT CA.CAID
+FROM ClinicalActivity AS CA
+JOIN Department AS D
+    ON D.DEP_ID = CA.DEP_ID
+JOIN Hospital AS H
+    ON H.HID = D.HID
+WHERE H.City = 'Benguerir'
+    AND CA.Date >= '2025-09-01'
+    AND CA.Date < '2025-10-01';
+\end{lstlisting}
+
+
+% -------------------------------------------------------------
+
+
+\item \textbf{Find Staff IDs of staff who have issued more than one prescription.}
+
+\begin{multline*}
+\pi_{\text{STAFF\_ID}}\Big(
+  \sigma_{\text{COUNT(PID)} > 1}\Big(
+    \gamma_{\text{STAFF\_ID; COUNT(DISTINCT\ PID)}}( \\
+      \pi_{\text{STAFF\_ID, PID}}(
+        \text{StaffActivity} \bowtie_{\text{CAID}} \text{Prescription})
+    )
+  \Big)
+\Big)
+\end{multline*}
+
+\begin{lstlisting}
+SELECT sa.STAFF_ID
+FROM StaffActivity sa
+JOIN Prescription p ON sa.CAID = p.CAID
+GROUP BY sa.STAFF_ID
+HAVING COUNT(DISTINCT p.PID) > 1;
+\end{lstlisting}
+
+% -------------------------------------------------------------
+
+
+\item \textbf{List IIDs of patients who have scheduled appointments in more than one department.}
+
+\begin{multline*}
+\pi_{\text{IID}}\Big(
+  \sigma_{\text{COUNT(DEP\_ID)} > 1}\Big( \\
+    \gamma_{\text{IID; COUNT(DISTINCT\ DEP\_ID)}}( \\
+      \pi_{\text{IID, DEP\_ID}}(
+        \sigma_{\text{Status} = 'Scheduled'}(
+          \text{ClinicalActivity} \bowtie_{\text{CAID}} \text{Appointment})
+      )
+    )
+  \Big)
+\Big)
+\end{multline*}
+
+\begin{lstlisting}
+SELECT ca.IID
+FROM ClinicalActivity ca
+JOIN Appointment a ON ca.CAID = a.CAID
+WHERE a.Status = 'Scheduled'
+GROUP BY ca.IID
+HAVING COUNT(DISTINCT ca.DEP_ID) > 1;
+\end{lstlisting}
+
+% -------------------------------------------------------------
+
+\item \textbf{Find Staff IDs who have no scheduled appointments on the Green March holiday (November 6).}
+
+\begin{multline*}
+\pi_{STAFF\_ID}(Staff) - \pi_{STAFF\_ID}( \\
+  \sigma_{Date='2024-11-06' \land Status='Scheduled'}( \\
+    StaffActivity \bowtie_{CAID} ClinicalActivity \bowtie_{CAID} Appointment))
+\end{multline*}
+
+\begin{lstlisting}
+SELECT STAFF_ID
+FROM Staff
+WHERE STAFF_ID NOT IN (
+    SELECT sa.STAFF_ID
+    FROM StaffActivity sa
+    JOIN ClinicalActivity ca ON sa.CAID = ca.CAID
+    JOIN Appointment a ON ca.CAID = a.CAID
+    WHERE ca.Date = '2024-11-06' AND a.Status = 'Scheduled'
+);
+\end{lstlisting}
+
+% -------------------------------------------------------------
+
+\item \textbf{Find departments whose number of clinical activities is below the global departmental average:}
+
+\[
+\begin{aligned}
+&\text{DeptCount} \leftarrow \gamma_{\text{DEP\_ID};\, \text{count}(\text{CAID}) \rightarrow \text{cnt}}(\text{ClinicalActivity}) \\
+&\text{GlobalAvg} \leftarrow \gamma_{ }(\text{avg}(\text{cnt}) \rightarrow \text{gavg})(\text{DeptCount}) \\
+&\text{Answer} \leftarrow \pi_{\text{DEP\_ID}}\big(\sigma_{\text{cnt} < \text{gavg}}(\text{DeptCount} \times \text{GlobalAvg})\big)
+\end{aligned}
+\]
+
+\begin{lstlisting}[language=SQL, showspaces=false, basicstyle=\ttfamily]
+WITH DeptCount AS (
+  SELECT CA.DEP_ID, COUNT(*) AS cnt
+  FROM ClinicalActivity CA
+  GROUP BY CA.DEP_ID
+),
+GlobalAvg AS (
+  SELECT AVG(cnt) AS gavg
+  FROM DeptCount
+)
+SELECT D.DEP_ID
+FROM DeptCount DC
+JOIN Department D ON D.DEP_ID = DC.DEP_ID
+CROSS JOIN GlobalAvg GA
+WHERE DC.cnt < GA.gavg;
+\end{lstlisting}
+
+% -------------------------------------------------------------
+
+
+\item \textbf{For each staff member, return the patient(s) with the greatest number of completed appointments with that staff member:}
+
+\[
+\begin{aligned}
+R_1 &\leftarrow \sigma_{\text{Status} = 'completed'} (\text{ClinicalActivity} \bowtie \text{Appointment}) \\[6pt]
+R_2 &\leftarrow \pi_{\text{AID}, \text{STAFF\_ID}, \text{IID}} (R_1) \\[6pt]
+R_3 &\leftarrow \gamma_{\text{STAFF\_ID}, \text{IID};\ \text{COUNT}(*) \rightarrow n}(R_2) \\[6pt]
+R_{\text{max}} &\leftarrow \gamma_{\text{STAFF\_ID};\ \max(n) \rightarrow \text{max\_n}}(R_3) \\[6pt]
+\text{Answer} &\leftarrow
+\pi_{\text{STAFF\_ID}, \text{IID}} \Big(
+R_3 \bowtie_{\substack{R_3.\text{STAFF\_ID} = R_{\text{max}}.\text{STAFF\_ID} \\
+R_3.n = R_{\text{max}}.\text{max\_n}}} R_{\text{max}}
+\Big)
+\end{aligned}
+\]
+
+\begin{lstlisting}[language=SQL, showspaces=false, basicstyle=\ttfamily]
+WITH Completed AS (
+  SELECT CA.STAFF_ID, CA.IID, CA.CAID
+  FROM ClinicalActivity CA
+  JOIN Appointment A ON A.CAID = CA.CAID
+  WHERE A.Status = 'completed'
+),
+Counts AS (
+  SELECT STAFF_ID, IID, COUNT(*) AS n
+  FROM Completed
+  GROUP BY STAFF_ID, IID
+),
+MaxCounts AS (
+  SELECT STAFF_ID, MAX(n) AS max_n
+  FROM Counts
+  GROUP BY STAFF_ID
+)
+SELECT C.STAFF_ID, C.IID
+FROM Counts C
+JOIN MaxCounts M
+  ON C.STAFF_ID = M.STAFF_ID
+ AND C.n = M.max_n;
+\end{lstlisting}
+
+
+% -------------------------------------------------------------
+
+
+\item \textbf{List patients who had at least 3 emergency admissions during the year 2024:}
+
+\[
+\begin{aligned}
+&\text{E2024} \leftarrow \sigma_{\text{Date} \geq '2024\text{-}01\text{-}01' \ \land\ \text{Date} \leq '2024\text{-}12\text{-}31'}(\text{ClinicalActivity}) \bowtie_{\text{CAID}} \text{Emergency} \\
+&\text{Counts} \leftarrow \gamma_{\text{IID};\, \text{count}(\text{CAID}) \rightarrow \text{cnt}}(\text{E2024}) \\
+&\text{Answer} \leftarrow \pi_{\text{IID}}(\sigma_{\text{cnt} \ge 3}(\text{Counts}))
+\end{aligned}
+\]
+
+\begin{lstlisting}[language=SQL, showspaces=false, basicstyle=\ttfamily]
+SELECT CA.IID, P.FullName
+FROM ClinicalActivity CA
+JOIN Emergency E ON E.CAID = CA.CAID
+JOIN Patient P ON P.IID = CA.IID
+WHERE CA.Date >= '2024-01-01'
+  AND CA.Date < '2025-01-01'
+GROUP BY CA.IID, P.FullName
+HAVING COUNT(*) >= 3;
+\end{lstlisting}
+
+
+\end{enumerate}
+
+
+
+
+\section{Discussion}
+\quad Stepping back from the mechanics, a few themes stood out. Our treatment of naming in \textit{Medication}, especially whether 
+\textit{Name} determines dosage and related attributes, hinged on domain input; client practices shaped what we considered 
+redundancy. We also felt the gap between RA's relative brevity and clean structure and SQL's verbosity: what reads as a single
+operator can turn into layered joins and \texttt{HAVING} clauses. Wrapping our heads around the translation was certainly a
+good exercise in noticing the stark difference between practical and theoretical models. \newline
+This dual representation strengthened our understanding of how abstract data models translate into executable logic.
+
+
+\section{Conclusion}
+\quad By identifying functional dependencies, we clarified that attributes may depend not only on the primary key but also on other attributes.\newline
+For querying, the RA expressions and the SQL statements highlighted the link between theory and practice: RA specifies the operations needed to retrieve data, while SQL turns those operations into commands that run on the database workbench.\newline
+This two-level approach, formal and operational, helped bridge the gap between database theory and real execution, fostering a clearer and more disciplined way of reasoning about data.
+\end{document}
