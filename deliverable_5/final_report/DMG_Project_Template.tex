@@ -1,0 +1,80 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{graphicx}   % images
+\usepackage{fancyhdr}   % headers/footers
+\usepackage{tcolorbox}
+\usepackage{listings}
+\usepackage{xcolor}
+\geometry{margin=1in}
+
+% ---------- Header ----------
+\setlength{\headheight}{36pt}
+\setlength{\headsep}{18pt}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhf{}
+\fancyhead[L]{\includegraphics[width=0.13\textwidth, keepaspectratio]{Figures/UM6Plogo.png}}
+\fancyhead[R]{\includegraphics[width=0.13\textwidth, keepaspectratio]{Figures/CC.jpg}}
+\fancyfoot[L]{Data Management Lab}
+\fancyfoot[R]{Prof. Karima Echihabi}
+\fancyfoot[C]{Page \thepage}
+
+% ---------- Deliverable Template ----------
+\begin{document}
+\thispagestyle{empty}
+\begin{center}
+  \includegraphics[width=0.25\textwidth]{Figures/UM6Plogo.png}\hfill
+  \includegraphics[width=0.25\textwidth]{Figures/CC.jpg}
+  \vspace{1.2cm}
+
+  {\LARGE \textbf{Deliverable \#: Title of Lab/Project here (e.g.: Conceptual Design ....)}}\\[0.6cm]
+  {\large \textbf{Data Management Course}}\\[0.2cm]
+  {\large UM6P College of Computing}\\[0.8cm]
+
+  {\normalsize \textbf{Professor:} Karima Echihabi \quad 
+   \textbf{Program:} Computer Engineering}\\[0.1cm]
+  {\normalsize \textbf{Session:} Fall 2025}\\[1cm]
+
+  \rule{0.9\textwidth}{0.5pt}\\[0.5cm]
+  {\large \textbf{Team Information}} \\[0.3cm]
+  \begin{tabular}{|l|l|}
+    \hline
+    \textbf{Team Name} & ........................ \\ \hline
+    \textbf{Member 1}  & Name  \\ \hline
+    \textbf{Member 2}  & Name   \\ \hline
+    \textbf{Member 3}  & Name   \\ \hline
+    \textbf{Repository Link} & \texttt{https://github.com/...} \\ \hline
+  \end{tabular}
+  \rule{0.9\textwidth}{0.5pt}\\
+\end{center}
+\clearpage
+\pagestyle{fancy}
+
+% ---------- Sections for Students ----------
+\section{Introduction}
+Briefly describe the problem and what this deliverable covers (max 100 words).
+
+\section{Requirements}
+List the tasks or requirements addressed in this deliverable.
+
+\section{Methodology}
+Explain your design choices, assumptions, and strategy.
+
+\section{Implementation \& Results}
+Include:
+\begin{itemize}
+    \item ERD or schema diagrams (if relevant)
+    \item SQL or code snippets
+    \item Screenshots of outputs
+\end{itemize}
+
+
+\section{Discussion}
+Challenges faced, observations, lessons learned.
+
+\section{Conclusion}
+Short summary of the deliverable outcome.
+
+
+
+\end{document}
