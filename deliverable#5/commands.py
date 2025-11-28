@@ -1,0 +1,136 @@
+from db import get_connection
+from collections import defaultdict
+
+
+def list_patients():
+    
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    query = """SELECT 
+        IID,
+        CONCAT(FirstName, ' ', LastName) AS FullName
+    FROM 
+        Patient
+    ORDER BY 
+        LastName ASC
+    LIMIT 20;"""
+    
+    cursor.execute(query) 
+    results = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    
+    return results
+
+def schedule_appointment(caid, iid, staff_id, dep_id, date_str, time_str, reason):
+    ins_ca = """
+    INSERT INTO ClinicalActivity(CAID, IID, STAFF_ID, DEP_ID, Date, Time)
+    VALUES (%s , %s , %s , %s , %s , %s )
+    """
+    ins_appt = """
+    INSERT INTO Appointment(CAID, Reason, Status)
+    VALUES (%s , %s , 'Scheduled')
+    """
+    with get_connection() as cnx:
+        try:
+            with cnx.cursor() as cur:
+                cur.execute(ins_ca, (caid, iid, staff_id, dep_id, date_str, time_str))
+                cur.execute(ins_appt, (caid, reason))
+            cnx.commit()
+        except Exception:
+            cnx.rollback()
+            raise
+
+def low_stock():
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    query = """
+    SELECT
+    H.Name AS HospitalName,
+    M.Name AS MedicationName,
+    S.Qty,
+    S.ReorderLevel,
+    S.StockTimestamp
+    FROM Hospital H
+    CROSS JOIN Medication M
+    LEFT JOIN (
+    SELECT S1.*
+    FROM Stock S1
+    JOIN (
+        SELECT MID, HID, MAX(StockTimestamp) AS MaxTime
+        FROM Stock
+        GROUP BY MID, HID) S2
+    ON S1.MID = S2.MID
+    AND S1.HID = S2.HID
+    AND S1.StockTimestamp = S2.MaxTime) S
+    ON S.HID = H.HID
+    AND S.MID = M.MID
+    WHERE
+    S.Qty IS NULL OR S.Qty < S.ReorderLevel
+    ORDER BY
+    H.Name, 
+    M.Name;
+    """
+
+    cursor.execute(query)
+    results = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return results
+
+
+def staff_share():
+    sql = """
+    SELECT 
+        s.STAFF_ID,
+        s.FullName AS StaffName,
+        h.HID,
+        h.Name AS HospitalName,
+        COUNT(a.CAID) AS TotalAppointments
+    FROM 
+        Staff s
+        JOIN ClinicalActivity ca ON s.STAFF_ID = ca.STAFF_ID
+        JOIN Appointment a ON ca.CAID = a.CAID
+        JOIN Department d ON ca.DEP_ID = d.DEP_ID
+        JOIN Hospital h ON d.HID = h.HID
+    GROUP BY 
+        s.STAFF_ID, s.FullName, h.HID, h.Name
+    """
+    
+    with get_connection() as cnx:
+        with cnx.cursor(dictionary=True) as cur:
+            cur.execute(sql)
+            staff_data = cur.fetchall()
+    
+
+    hospital_totals = defaultdict(int)
+    for staff in staff_data:
+        hospital_totals[staff['HID']]+= staff['TotalAppointments']
+    
+    results = []
+    for staff in staff_data:
+        hospital_total= hospital_totals[staff['HID']]
+        percentage= round((staff['TotalAppointments'] * 100)/hospital_total, 2) if hospital_total != 0 else 0.0
+        
+        results.append({
+            'STAFF_ID': staff['STAFF_ID'],
+            'StaffName': staff['StaffName'],
+            'HospitalName': staff['HospitalName'],
+            'TotalAppointments': staff['TotalAppointments'],
+            'HospitalTotal': hospital_total,
+            'PercentageShare': percentage
+        })
+    
+    
+    results.sort(key=lambda x: (
+        x['HospitalName'],
+        -x['PercentageShare'],
+        x['StaffName']
+    ))
+    
+    return results
+
+
+
