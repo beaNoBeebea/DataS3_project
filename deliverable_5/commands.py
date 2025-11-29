@@ -24,23 +24,62 @@ def list_patients():
     return results
 
 def schedule_appointment(caid, iid, staff_id, dep_id, date_str, time_str, reason):
+    check_patient_sql = "SELECT IID FROM Patient WHERE IID = %s"
+    check_staff_sql = "SELECT STAFF_ID FROM Staff WHERE STAFF_ID = %s"
+    check_department_sql = "SELECT DEP_ID FROM Department WHERE DEP_ID = %s"
+    check_caid_sql = "SELECT CAID FROM ClinicalActivity WHERE CAID = %s"
+
     ins_ca = """
     INSERT INTO ClinicalActivity(CAID, IID, STAFF_ID, DEP_ID, Date, Time)
-    VALUES (%s , %s , %s , %s , %s , %s )
+    VALUES (%s, %s, %s, %s, %s, %s)
     """
+
     ins_appt = """
     INSERT INTO Appointment(CAID, Reason, Status)
-    VALUES (%s , %s , 'Scheduled')
+    VALUES (%s, %s, 'Scheduled')
     """
+
     with get_connection() as cnx:
         try:
             with cnx.cursor() as cur:
+
+                # Check Patient exists
+                cur.execute(check_patient_sql, (iid,))
+                if not cur.fetchone():
+                    print(f"Patient {iid} doesn't exist")
+                    return False
+                
+                # Check Staff exists
+                cur.execute(check_staff_sql, (staff_id,))
+                if not cur.fetchone():
+                    print(f"Staff {staff_id} doesn't exist")
+                    return False
+                
+                # Check Department exists
+                cur.execute(check_department_sql, (dep_id,))
+                if not cur.fetchone():
+                    print(f"Department {dep_id} doesn't exist")
+                    return False
+                
+                # Check CAID does NOT already exist (fix)
+                cur.execute(check_caid_sql, (caid,))
+                if cur.fetchone():
+                    print(f"ClinicalActivity ID {caid} already exists")
+                    return False
+                
+                # Insert
                 cur.execute(ins_ca, (caid, iid, staff_id, dep_id, date_str, time_str))
                 cur.execute(ins_appt, (caid, reason))
+
             cnx.commit()
-        except Exception:
+            print("Appointment scheduled")
+            return True
+        
+        except Exception as e:
             cnx.rollback()
-            raise
+            print(f"Failed: {e}")
+            return False
+
 
 def low_stock():
     conn = get_connection()
