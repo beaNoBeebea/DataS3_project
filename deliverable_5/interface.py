@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import datetime
+import io
+from contextlib import redirect_stdout
 
 # IMPORT YOUR BACKEND FUNCTIONS
 # We wrap this in a try/except block to prevent the app from crashing 
@@ -86,8 +88,6 @@ if choice == "Patient List":
 elif choice == "Schedule Appointment":
     st.header("📅 Schedule New Appointment")
     
-    # We use a Form to prevent the backend function from triggering 
-    # until the user hits "Submit"
     with st.form("appointment_form"):
         col1, col2 = st.columns(2)
         
@@ -98,7 +98,6 @@ elif choice == "Schedule Appointment":
             dept_id = st.number_input("Department ID", min_value=1, step=1)
             
         with col2:
-            # Date and Time pickers are much safer than typing strings
             appt_date = st.date_input("Date", min_value=datetime.date.today())
             appt_time = st.time_input("Time")
             reason = st.text_area("Reason for Visit", placeholder="e.g., Routine Checkup")
@@ -106,27 +105,43 @@ elif choice == "Schedule Appointment":
         submitted = st.form_submit_button("Confirm Schedule")
         
         if submitted:
+            # 1. Format the date/time strings
+            formatted_date = appt_date.strftime("%Y-%m-%d")
+            formatted_time = appt_time.strftime("%H:%M:%S")
+            
+            # 2. Setup a trap to catch print() statements
+            output_capture = io.StringIO()
+            
             try:
-                # Convert Streamlit Date/Time objects to the strings your CLI expected
-                # CLI expected: YYYY-MM-DD and HH:MM:SS
-                formatted_date = appt_date.strftime("%Y-%m-%d")
-                formatted_time = appt_time.strftime("%H:%M:%S")
+                # redirect_stdout captures anything your backend prints
+                with redirect_stdout(output_capture):
+                    is_success = schedule_appointment(
+                        caid, 
+                        iid, 
+                        staff_id, 
+                        dept_id, 
+                        formatted_date, 
+                        formatted_time, 
+                        reason
+                    )
                 
-                # Call the backend function
-                schedule_appointment(
-                    caid, 
-                    iid, 
-                    staff_id, 
-                    dept_id, 
-                    formatted_date, 
-                    formatted_time, 
-                    reason
-                )
-                st.success(f"✅ Appointment scheduled successfully for {formatted_date} at {formatted_time}.")
-                
-            except Exception as e:
-                st.error(f"❌ Failed to schedule: {e}")
+                # Get the printed text (e.g., "Patient 101 doesn't exist")
+                backend_message = output_capture.getvalue()
 
+                # 3. Handle the Result
+                if is_success:
+                    st.success(f"✅ Appointment scheduled successfully.")
+                else:
+                    # Show the specific error from the backend print
+                    st.error(f"❌ Failed to schedule.")
+                    if backend_message:
+                        st.warning(f"System Message: {backend_message}")
+                    else:
+                        st.warning("Reason unknown (No message returned from database).")
+                        
+            except Exception as e:
+                st.error(f"An unexpected error occurred: {e}")
+                
 # --- OPTION 3: LOW STOCK ---
 elif choice == "Inventory (Low Stock)":
     st.header("⚠️ Low Stock Alert")

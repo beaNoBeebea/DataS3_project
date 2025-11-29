@@ -9,6 +9,11 @@ def list_patients():
     
     query = """SELECT 
         IID,
+        CIN,
+        Birth,
+        Sex,
+        BloodGroup,
+        Phone,
         CONCAT(FirstName, ' ', LastName) AS FullName
     FROM 
         Patient
@@ -18,6 +23,7 @@ def list_patients():
     
     cursor.execute(query) 
     results = cursor.fetchall()
+
     cursor.close()
     conn.close()
     
@@ -87,30 +93,27 @@ def low_stock():
 
     query = """
     SELECT
-    H.Name AS HospitalName,
-    M.Name AS MedicationName,
-    S.Qty,
-    S.ReorderLevel,
-    S.StockTimestamp
-    FROM Hospital H
-    CROSS JOIN Medication M
-    LEFT JOIN (
-    SELECT S1.*
-    FROM Stock S1
+        H.Name,
+        M.Name,
+        S.Qty,
+        S.ReorderLevel,
+        S.StockTimestamp
+    FROM Stock S
     JOIN (
-        SELECT MID, HID, MAX(StockTimestamp) AS MaxTime
+        SELECT
+            MID, HID,
+            MAX(StockTimestamp) AS MaxTime
         FROM Stock
-        GROUP BY MID, HID) S2
-    ON S1.MID = S2.MID
-    AND S1.HID = S2.HID
-    AND S1.StockTimestamp = S2.MaxTime) S
-    ON S.HID = H.HID
-    AND S.MID = M.MID
-    WHERE
-    S.Qty IS NULL OR S.Qty < S.ReorderLevel
-    ORDER BY
-    H.Name, 
-    M.Name;
+        GROUP BY MID, HID
+    ) L ON L.MID = S.MID 
+    AND L.HID = S.HID
+    AND L.MaxTime = S.StockTimestamp
+    JOIN Medication M ON M.MID = S.MID
+    JOIN Hospital H ON H.HID = S.HID
+    WHERE S.Qty < S.ReorderLevel
+    ORDER BY H.Name, M.Name;
+
+
     """
 
     cursor.execute(query)
