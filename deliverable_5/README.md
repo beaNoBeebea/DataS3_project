@@ -222,7 +222,7 @@ For that, see the sql/example_queries & sql/testing folders
 
 
 
-e## 🐛 Troubleshooting
+## 🐛 Troubleshooting
 ## Common Issues
 ### Database Connection Failed
 - Check .env file exists and has correct values
