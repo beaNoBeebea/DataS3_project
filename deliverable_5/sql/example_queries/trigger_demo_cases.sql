@@ -87,15 +87,15 @@ DELETE FROM ClinicalActivity WHERE CAID IN (999021, 999022, 999023);
 -- 2. RECOMPUTE EXPENSE TOTAL TRIGGER
 -- ==========================================
 
--- Test 2a: INSERT medications - total should auto-update
+-- Test 2.a: INSERT medications - total should auto-update
 INSERT INTO ClinicalActivity (CAID, IID, STAFF_ID, DEP_ID, Date, Time)
 VALUES (888001, 1001, 2001, 51, '2025-12-01', '09:00:00');
 
-INSERT INTO Expense (CAID, Total)
-VALUES (888001, 0.00);
+INSERT INTO Expense (ExpID, CAID, Total)
+VALUES (9001, 888001, 0.00);
 
-INSERT INTO Prescription (PID, CAID)
-VALUES (777001, 888001);
+INSERT INTO Prescription (PID, CAID, DateIssued)
+VALUES (777001, 888001, CURDATE());
 
 -- Check initial total
 SELECT CAID, Total FROM Expense WHERE CAID = 888001;
@@ -104,65 +104,103 @@ SELECT CAID, Total FROM Expense WHERE CAID = 888001;
 INSERT INTO Include_Medication (PID, MID)
 VALUES (777001, 3001);
 
--- Check updated total (should auto-increase to 1.45)
+-- Check updated total (should auto-increase)
 SELECT CAID, Total FROM Expense WHERE CAID = 888001;
+-- RESULT:
+-- +--------+-------+
+-- | CAID   | Total |
+-- +--------+-------+
+-- | 888001 |  2.95 |
+-- +--------+-------+
+-- 1 row in set (0.000 sec)
 
 -- Add second medication (Amlor from Hospital 10 - Rabat)
 INSERT INTO Include_Medication (PID, MID)
 VALUES (777001, 3004);
 
--- Check total again (should increase to 1.45 + 0.90 = 2.35)
+-- Check total again (should increase further)
 SELECT CAID, Total FROM Expense WHERE CAID = 888001;
+-- RESULT:
+-- +--------+-------+
+-- | CAID   | Total |
+-- +--------+-------+
+-- | 888001 |  3.85 |
+-- +--------+-------+
+-- 1 row in set (0.000 sec)
+
 
 -- Cleanup
 DELETE FROM Include_Medication WHERE PID = 777001;
 DELETE FROM Prescription WHERE PID = 777001;
-DELETE FROM Expense WHERE CAID = 888001;
+DELETE FROM Expense WHERE ExpID = 9001;
 DELETE FROM ClinicalActivity WHERE CAID = 888001;
 
 
--- Test 2b: DELETE medication - total should auto-decrease
+-- Test 2.b: DELETE medication - total should auto-decrease
 INSERT INTO ClinicalActivity (CAID, IID, STAFF_ID, DEP_ID, Date, Time)
 VALUES (888002, 1001, 2001, 51, '2025-12-01', '10:00:00');
-INSERT INTO Expense (CAID, Total) VALUES (888002, 0.00);
-INSERT INTO Prescription (PID, CAID) VALUES (777002, 888002);
+
+INSERT INTO Expense (ExpID, CAID, Total) 
+VALUES (9002, 888002, 0.00);
+
+INSERT INTO Prescription (PID, CAID, DateIssued) 
+VALUES (777002, 888002, CURDATE());
 
 -- Add three medications
 INSERT INTO Include_Medication (PID, MID) VALUES (777002, 3001);
 INSERT INTO Include_Medication (PID, MID) VALUES (777002, 3004);
 INSERT INTO Include_Medication (PID, MID) VALUES (777002, 3008);
 
--- Check total with 3 medications (1.45 + 0.90 + 2.50 = 4.85)
+-- Check total with 3 medications
 SELECT CAID, Total FROM Expense WHERE CAID = 888002;
+-- RESULT:
+-- +--------+-------+
+-- | CAID   | Total |
+-- +--------+-------+
+-- | 888002 |  6.35 |
+-- +--------+-------+
+-- 1 row in set (0.000 sec)
 
--- Delete one medication (Amlor - 0.90)
+-- Delete one medication (Amlor)
 DELETE FROM Include_Medication WHERE PID = 777002 AND MID = 3004;
 
--- Check reduced total (should auto-decrease to 3.95)
+-- Check reduced total (should auto-decrease)
 SELECT CAID, Total FROM Expense WHERE CAID = 888002;
+-- RESULT:
+-- +--------+-------+
+-- | CAID   | Total |
+-- +--------+-------+
+-- | 888002 |  5.45 |
+-- +--------+-------+
+-- 1 row in set (0.000 sec)
 
 -- Cleanup
 DELETE FROM Include_Medication WHERE PID = 777002;
 DELETE FROM Prescription WHERE PID = 777002;
-DELETE FROM Expense WHERE CAID = 888002;
+DELETE FROM Expense WHERE ExpID = 9002;
 DELETE FROM ClinicalActivity WHERE CAID = 888002;
 
 
--- Test 2c: Add medication without price (SHOULD FAIL)
+-- Test 2.c: Add medication without price (SHOULD FAIL)
 INSERT INTO ClinicalActivity (CAID, IID, STAFF_ID, DEP_ID, Date, Time)
 VALUES (888003, 1001, 2001, 51, '2025-12-01', '11:00:00');
-INSERT INTO Expense (CAID, Total) VALUES (888003, 0.00);
-INSERT INTO Prescription (PID, CAID) VALUES (777003, 888003);
 
--- This should FAIL (medication doesn't exist in stock for this hospital)
-INSERT INTO Include_Medication (PID, MID) VALUES (777003, 99999);
--- Expected: Error - "Price for medication is missing"
+INSERT INTO Expense (ExpID, CAID, Total) 
+VALUES (9003, 888003, 0.00);
+
+INSERT INTO Prescription (PID, CAID, DateIssued) 
+VALUES (777003, 888003, CURDATE());
+
+-- This should FAIL (medication exists but has no stock at Hospital 10 - Rabat)
+-- Medication 3002 (Amoclan) only has stock at Hospital 20 (Casablanca), not at Hospital 10
+INSERT INTO Include_Medication (PID, MID) VALUES (777003, 3002);
+-- RESULT:
+-- ERROR 1644 (45000): Price for medication is missing
 
 -- Cleanup
 DELETE FROM Prescription WHERE PID = 777003;
-DELETE FROM Expense WHERE CAID = 888003;
+DELETE FROM Expense WHERE ExpID = 9003;
 DELETE FROM ClinicalActivity WHERE CAID = 888003;
-
 
 -- ==========================================
 -- 3. PREVENT BAD STOCK TRIGGER
