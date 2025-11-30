@@ -169,7 +169,7 @@ Edit .env and add the following:
 ```env
 DB_HOST=localhost
 DB_PORT=3306
-DB_DATABASE=mnhs_db
+DB_DATABASE=MNHS
 DB_USERNAME=mnhs_user
 DB_PASSWORD=StrongPassword123!
 ```
