@@ -105,7 +105,7 @@ mysql -u root -p
 ```
 
 Run the following SQL commands:
-```bash
+```sql
 -- Create the database
 CREATE DATABASE IF NOT EXISTS MNHS;
 
