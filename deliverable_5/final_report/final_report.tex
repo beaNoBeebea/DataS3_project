@@ -1,0 +1,389 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{tcolorbox}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{setspace}
+\doublespacing  % 2.0 line spacing
+
+
+% Fix geometry and header height issues
+\geometry{
+    margin=1in,
+    headheight=52pt,  % Increased headheight to accommodate images
+    headsep=25pt      % Adequate separation between header and text
+}
+
+% Custom colors for code listings
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{sqlstyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    language=SQL
+}
+
+\lstdefinestyle{pythonstyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    language=Python
+}
+
+% Header configuration
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\includegraphics[height=40pt]{Figures/UM6Plogo.png}} % Fixed height
+\fancyhead[R]{\includegraphics[height=40pt]{Figures/CC.jpg}} % Fixed height
+\fancyfoot[L]{Data Management Lab}
+\fancyfoot[R]{Prof. Karima Echihabi}
+\fancyfoot[C]{Page \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Fix list spacing
+\setlist{nosep}
+
+\begin{document}
+
+% Title page with no header/footer
+\thispagestyle{empty}
+\begin{center}
+  \includegraphics[width=0.25\textwidth]{Figures/UM6Plogo.png}\hfill
+  \includegraphics[width=0.25\textwidth]{Figures/CC.jpg}
+  \vspace{1.2cm}
+
+  {\LARGE \textbf{Deliverable \#5: Views, Triggers and Application Development}}\\[0.6cm]
+  {\large \textbf{Data Management Course}}\\[0.2cm]
+  {\large UM6P College of Computing}\\[0.8cm]
+
+  {\normalsize \textbf{Professor:} Karima Echihabi \quad 
+   \textbf{Program:} Computer Engineering}\\[0.1cm]
+  {\normalsize \textbf{Session:} Fall 2025}\\[1cm]
+
+  \rule{0.9\textwidth}{0.5pt}\\[0.5cm]
+  {\large \textbf{Team Information}} \\[0.3cm]
+  \begin{tabular}{|l|l|}
+    \hline
+    \textbf{Team Name} & Groupe2 \\ \hline
+    \textbf{Member 1}  & Abir Fakhreddine   \\ \hline
+    \textbf{Member 2}  & Malak El Assali   \\ \hline
+    \textbf{Member 3}  & Nada El Farissi  \\ \hline
+    \textbf{Member 4}  & Amine Chrif   \\ \hline
+    \textbf{Member 5}  & Anass Fertat   \\ \hline
+    \textbf{Member 6}  & Yasser Hallou  \\ \hline
+    \textbf{Repository Link} & \texttt{https://github.com/beaNoBeebea} \\ \hline
+  \end{tabular}
+  \rule{0.9\textwidth}{0.5pt}\\
+\end{center}
+\clearpage
+
+% Rest of document with fancy headers
+\section{Introduction}
+This deliverable presents a comprehensive healthcare management web application developed for the Moroccan National Health Services (MNHS), complemented with a robust implementation of triggers and views to maintain business logic rules. 
+This system addresses real-world healthcare challenges such as appointment scheduling, inventory managements with automated low stock alerts, and more.
+By harnessing MySQL's advanced features such as triggers and views, we were able to simplify data access and enforce data integrity.
+Built as part of the Data Management course, this project demonstrates the team's core understanding of the course material, and concepts such as complex SQL triggers, and views, and database-driven application development.
+The system architecture integrates a MySQL backend with a Streamlit-based user interface, providing a highly simplified - and quite rudimentary for the moment - platform for healthcare professionals to manage daily operations efficiently.
+
+\section{Requirements}
+\subsection{SQL Views}
+\begin{itemize}
+    \item \textbf{UpcomingByHospital}: Provides 14-day appointment forecasts per hospital 
+    \begin{itemize}
+        \item Helps staffing decisions based on predicted demand
+        \item Better resource allocation decisions
+    \end{itemize}
+    \vspace{3mm}
+    
+    \item \textbf{DrugPricingSummary}: Analyzes medication pricing across hospital network.
+    \begin{itemize}
+        \item Helps homogenize drug pricing benchmarking across hospitals
+        \item Better tracking overall
+    \end{itemize}
+    \vspace{3mm}
+    
+    \item \textbf{StaffWorkloadThirty}: Tracks staff performance metrics over 30-day periods 
+    \begin{itemize}
+        \item Balancing workload across departments
+        \item Helps scheduling decisions
+    \end{itemize}
+    \vspace{3mm}
+    
+    
+    \item \textbf{PatientNextVisit}: Manages patient appointment scheduling and tracking 
+    \begin{itemize}
+        \item Filters only scheduled future appointments
+        \item Uses correlated subquery to find earliest upcoming visit
+        \item Provides complete hospital and department context
+    \end{itemize}
+    
+\end{itemize}
+
+\subsection{Database Triggers}
+\begin{itemize}
+    \item \textbf{Double Booking Prevention}: Ensures staff availability for appointments
+    \begin{itemize}
+        \item Separate triggers for INSERT and UPDATE operations
+        \item Conditional execution in UPDATE to avoid unnecessary checks
+        \item Clear error messages
+    \end{itemize}
+    
+    \item \textbf{Expense Recalculation}: Automatically updates prescription costs
+    \begin{itemize}
+        \item Real-time cost updates for accurate billing
+        \item Price validation before calculation
+
+    \end{itemize}
+    
+    \item \textbf{Stock Validation}: Maintains inventory data integrity
+    \begin{itemize}
+        \item Prevents negative quantity errors
+        \item Maintains data consistency across operations
+    \end{itemize}
+    
+    \item \textbf{Patient Deletion Protection}: Preserves referential integrity
+    \begin{itemize}
+        \item Prevents loss of medical history
+        \item Maintains referential integrity
+    \end{itemize}
+    
+\end{itemize}
+    
+
+\subsection{Application Layer}
+\begin{itemize}
+    \item \textbf{CLI Interface}: Four operational commands for daily hospital tasks
+    \item \textbf{Streamlit Web Interface}: AI-assisted web interface for better visualization and more seamless insertion of data
+    \item \textbf{Database Connectivity}: Secure MySQL connection management
+    \item \textbf{Transaction Management}: Atomic operations for critical workflows
+    \item \textbf{Error Handling}: Exception management
+\end{itemize}
+
+\section{Methodology}
+
+\subsection{Application Design Approach}
+
+
+\begin{enumerate}
+    \item \textbf{Requirements Analysis}: of the functionalities needed for this section of the project.
+    \item \textbf{System Architecture Design}: Designed a three-tier strucutre separating database, backend, and frontend layers for clearer division of roles between teammates, and for more clarity for future scaling/maintenance of the app.
+    \item \textbf{Database Schema Optimization}: Evaluated and refined existing MNHS database relationships
+    \item \textbf{Business Logic Implementation}: Encoded cited rules at three levels:
+    \begin{itemize}
+        \item \textbf{Database Level}: Implemented triggers for data integrity and business rule enforcement
+        \item \textbf{Backend Level}: Developed Python functions with transaction management and error handling - built on the database logic.
+        \item \textbf{Application Level}: Created validation/error message indicators in both CLI and web interfaces
+    \end{itemize}
+    \item \textbf{Integration \& Testing}: Sample commands and queries for testing.
+\end{enumerate}
+
+\section{Implementation \& Results}
+
+\subsection{Database Views Implementation}
+
+\subsubsection{PatientNextVisit View}
+This view solves the critical healthcare challenge of tracking patient follow-ups by identifying the next scheduled appointment for each patient.
+\begin{itemize}
+        \item This view displays each patient's next scheduled visit with information about the patient, the department and the hospital. 
+        \item It does this by joining \texttt{Patient} → \texttt{ClinicalActivity} → \texttt{Appointment} and \texttt{Department} → \texttt{Hospital}  and only keeping the rows where the appointment is actually scheduled and with a date greater than today's date (fetched with the SQL command \texttt{CURDATE}). 
+        \item The view contains a nested subquery to find the minimum amongst all dates that verify the previous conditions for a given patient.
+    \end{itemize}
+
+\subsubsection{UpcomingByHospital View}
+Essential for resource planning, this view provides a 14-day forecast of appointment volumes across the hospital network.
+
+\begin{itemize}
+        \item In this view we have used  \texttt{Appointment} joined through \texttt{ClinicalActivity} → \texttt{Department} → \texttt{Hospital}. The view only considers appointments with status ‘\texttt{Scheduled}’ between the current day and the following 14 days. For every hospital and date pair, it returns all hospital details, the clinical activity and the total number of scheduled appointments on that date.
+    \end{itemize}
+
+
+\subsubsection{DrugPricingSummary View}
+Critical for pharmaceutical management and cost control across the MNHS network.
+\begin{itemize}
+        \item Without the \texttt{DrugPricingSummary} view, any time we need information about medication pricing, we would need to \texttt{JOIN} twice and group by \texttt{Hospital} and \texttt{Medication}. The view reduces these repeated joins and the grouping logic, making the queries shorter and reusable whenever needed. 
+    \end{itemize}
+
+
+\subsubsection{StaffWorkloadThirty View}
+Supports workforce management by providing 30-day performance metrics for all staff members.
+\begin{itemize}
+        \item The \texttt{StaffWorkloadThirty} view provides a statistical summary of appointments for every staff member, breaking down totals into '\texttt{Scheduled}', '\texttt{Cancelled}', and '\texttt{Completed}' counts. It ensures comprehensive reporting by including staff with no current activity and automatically converting any \texttt{NULL} values into zeros for accurate analysis.
+\end{itemize}
+
+
+\subsection{Business Logic Triggers}
+
+\subsubsection{Double Booking Prevention}
+Ensures healthcare providers cannot be double-booked, maintaining service quality and schedule integrity.
+
+\begin{itemize}
+        \item The two triggers \texttt{reject\_double\_booking\_insert} and \texttt{reject\_double\_booking\_update} are implemented to prevent double booking of a staff member for a clinical activity. 
+        \item The \texttt{INSERT} Trigger checks before inserting a new clinical activity if another clinical activity is already assigned to that staff member at the same date and time. If so, an error is raised using a \texttt{SIGNAL} to stop the execution of the statement.
+        \item For the \texttt{UPDATE} Trigger it does a verification before any modification, which means that the only case where the trigger run is when the date, time, or staff member is changed, without this verification the trigger will run even if we try to update unrelated fields. We note that in the update version we add the condition ‘\texttt{CAID != OLD.CAID}’. This condition tells the trigger to ignore the appointment that is currently being updated when checking for conflicts. For example, if we only want to change the time of a clinical activity, without this condition, the update would be blocked.
+        \item Together, these two triggers ensure data consistency by ensuring that a staff member cannot perform two different clinical activities at the same time and date.
+    \end{itemize}
+
+\subsubsection{Expense Recalculation}
+Automatically maintains financial data integrity when prescription details change.
+
+\begin{itemize}
+        \item The triggers automatically recalculate the total cost of a prescription anytime prescription lines are inserted, deleted, or updated so that it wouldn’t have to be manually recomputed and risk inconsistencies or errors. They also prevent the change when a drug has no current price in \texttt{Stock} , ensuring that the total is not updated unless all pricing data is valid.
+    \end{itemize}
+
+
+\subsubsection{Stock Validation}
+Protects inventory data quality by enforcing business rules at the database level.
+
+\begin{itemize}
+        \item The \texttt{check\_stock\_ins} and \texttt{check\_stock\_ups} triggers protect the \texttt{Stock} table by validating data before any insert or update occurs. They automatically block transactions and raise errors if a user attempts to save negative quantities, negative reorder levels, or non-positive unit prices, ensuring only valid inventory data enters the system.
+    \end{itemize}
+
+
+\subsubsection{Patient Deletion Protection}
+Preserves medical history integrity by preventing accidental patient record deletion.
+
+\begin{itemize}
+        \item The \texttt{patient\_delete} trigger is a \texttt{BEFORE DELETE} trigger, therefore, it is executed each time we try to delete a patient. 
+        \item It checks if the patient has any records in Clinical Activities. 
+        \item If so, it blocks the deletion and sends an error message that tells the user to make the necessary modifications to the clinical activities table
+        \item This trigger protects referential integrity by preventing the deletion of patient records that have associated clinical activities.
+        \item In other words, it serves to make sure that we do not find a clinical activity with a non-existing patient.
+\end{itemize}
+
+\subsection{Results \& Testing}
+The database triggers and views were rigorously and repeatedly tested to ensure proper functionality. Many test cases were executed, that verified:
+
+\begin{itemize}
+    \item \textbf{Trigger Validation}
+    \item \textbf{View Performance} 
+    \item \textbf{Data Consistency}
+\end{itemize}
+
+All tests passed successfully, demonstrating robust database performance. Detailed test queries and their outputs are documented in the \texttt{sql/example\_queries} and \texttt{sql/testing} directories.
+
+\subsection{Python Application Layer}
+
+\subsubsection{Database Connection Management}
+Secure and efficient database connectivity.
+
+
+\subsubsection{CLI Command Implementation}
+Comprehensive command set for daily hospital operations.
+
+\textbf{Operational Commands Analysis:}
+\begin{itemize}
+    \item \textbf{list\_patients}: Simple patient list access
+    \item \textbf{schedule\_appt}: Safe appointment creation
+    \item \textbf{low\_stock}: Inventory analytics
+    \item \textbf{staff\_share}: Calculates percentage distributions using dictionaries
+\end{itemize}
+
+\subsubsection{Main Application Interface}
+Robust command-line interface, as well as simplified web interface.
+
+
+\section{Discussion}
+
+\subsection{Technical Challenges and Solutions}
+
+\subsubsection{Extensive Data Validation \& Testing}
+\textbf{Challenge}: Testing required massive data insertions to thoroughly test database views, triggers, and SQL commands, which was generated by AI. However, AI-generated test data needed rigorous validation to ensure accuracy, which proved to be maybe almost as time-consuming as if we had generated the data ourselves.
+
+\subsubsection{Limited SQL Capabilities}
+\textbf{Challenge}: Needed to implement sophisticated data integrity checks beyond basic constraints due to many fails of triggers.
+
+\textbf{Solution}:
+\begin{itemize}
+    \item Leveraged MySQL's procedural extensions using \texttt{BEGIN/END} blocks and \texttt{DELIMITER}
+\end{itemize}
+
+\subsubsection{Python Compatibility Issues}
+\textbf{Challenge}: Different Python versions caused major compatibility problems. Streamlit and pyarrow were not compatible with Python 3.14, which led to repeated installation errors. Set us back quite some time trying to figure out what was wrong.
+
+\textbf{Solution}:
+\begin{itemize}
+    \item Switched back to Python 3.11
+\end{itemize}
+
+\subsubsection{Virtual Environment Corrupted}
+\textbf{Challenge}: .venv broke multiple times (“bad interpreter”, pip pointing to a wrong path), causing Python to not run packages correctly.
+
+\textbf{Solution}:
+\begin{itemize}
+    \item Trial and error made us realize it was a problem with the directory name ("deliverable\#5"). Changing the name of the directory fixed what multiple debugging attempts couldn't fix.
+\end{itemize}
+
+
+\subsubsection{Handling Transaction Errors}
+\textbf{Challenge}: The CLI printed “Appointment scheduled” even when the DB insert failed
+
+\textbf{Solution}:
+\begin{itemize}
+    \item We updated the CLI to read the return value from schedule\_appointment() and only print success if it returns True
+\end{itemize}
+
+
+\subsection{Limitations}
+
+\begin{itemize}
+    \item Limited web interface 
+    \item Basic error reporting to users
+    \item Lack of user authentification
+    \item Lack of search and filtering functionalities
+    \item etc.
+\end{itemize}
+
+\subsection{AI-use disclaimer}
+This project leveraged AI tools to enhance its quality. AI was utilized in the following regards:
+\begin{itemize}
+    \item Data generation was mainly handled by AI with a certain amount of human oversight to verify the accuracy of the sample data.
+    \item Testing was partially handled by AI tools, as it generated a few advanced and complex queries to test triggers. All generated queries were manually reviewed and executed.
+    \item AI was heavily used in interface development (using Streamlit), but ultimately everything was verified by the team.
+\end{itemize}
+
+
+\section{Conclusion}
+This deliverable successfully demonstrates the practical application of database management concepts in a real-world healthcare context. \\
+Through this lab, we managed to grasp the importance of foundational and complex SQL constructs to maintain data integrity, with the added layer of the relevance of this project through every day health services that impact us all. \\
+The most eye-opening part was working with triggers to automatically apply business rules: preventing double-booking, validating stock values, and recomputing expenses whenever prescriptions changed. This made it clear how the database itself can protect the system from inconsistent or unsafe operations, instead of relying only on application code. \\
+We also faced some technical difficulties, which helped us reinforce some good coding habits and better error handling when something didn't behave as we expected it to. \\
+Ultimately, this lab not only strengthened our technical SQL skills, but also showed us how a well-designed database and application can directly support safer, more efficient healthcare services.
+
+
+
+\end{document}
