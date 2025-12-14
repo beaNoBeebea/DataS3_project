@@ -638,7 +638,6 @@ Indexing is very efficient as dataset size grows, reducing time execution of que
         \item \textbf{Atomicity:} In this example, we have two tracks of actions. Either we check the stock, subtract amount from Stock.Qty and save everything, or something fails along the way and the whole transaction is aborted, so Stock.Qty remains unchanged. This showcases how everything is done in one transaction, and if any part of the transaction fails, no partial or incorrect update remains.
     \end{itemize}
     
-    \item \textbf{Overall:} No particular ACID properties were found violated in this example. All properties (Atomicity, Consistency, Isolation, Durability) are satisfied.
 \end{itemize}
 
 
@@ -786,7 +785,7 @@ No, it is not $\mathbf{2PL}$ Strict because $T_2$ acquires an $\mathbf{X(B)}$ an
 The schedule $\mathbf{3}$ follows the $\mathbf{2PL}$ rule because $T_1$ and $T_2$ operate on disjoint data items, ensuring no conflict in the lock acquisitions. Both transactions complete their \textbf{Growing Phase} without entering the \textbf{Shrinking Phase} (No shrinking phase). It satisfies the strictness because all locks were held until the end of the transaction.
 
 \subsection{Schedule 4 Analysis}
-No, it is not $\mathbf{2PL}$ Strict because $T_1$ is in its \textbf{Growing Phase} by acquiring \textbf{Shared Lock} $\mathbf{X(A)}$; however, $T_2$ holding a shared $\mathbf{S(A)}$ lock causes a conflict.cae
+No, it is not $\mathbf{2PL}$ Strict because $T_1$ is in its \textbf{Growing Phase} by acquiring \textbf{Shared Lock} $\mathbf{X(A)}$; however, $T_2$ holding a shared $\mathbf{S(A)}$ lock causes a conflict.
 
 
 
@@ -816,6 +815,34 @@ Cycle in wait-for graph means deadlock exists.
     \item Deadlock avoidance: assign priorities to transactions.
  
     \item Deadlock detection and resolution: create a waits-for-graph
+\end{itemize}
+
+\section{Discussion}
+\label{sec:discussion}
+
+\begin{itemize}
+    \item In this lab, the work was less challenging than previous labs. However, it was very theory heavy, so we had to learn and understand several new concepts before using them for different cases.
+    
+    \item During the insertion of synthetic data, we had some technical problems. The large number of insertions caused connection shut down on some machines. To solve this problem, we had to test on another machine that could handle the workload better.
+\end{itemize}
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+\begin{itemize}
+    This project successfully optimized the Moroccan National Health Services (MNHS) database by integrating advanced physical design and transaction management strategies.
+
+
+\item \textbf{Performance Gains}: Through the strategic implementation of secondary indexes and partitioning (Range and Hash),
+ query execution times were significantly reduced, achieving a  speedup on datasets of 1 million rows.
+
+
+\item \textbf{Data Integrity}: The system's reliability was secured by applying ACID properties,
+ implementing atomic transactions for critical operations, and resolving concurrency issues through Conflict Serializability and Deadlock analysis.\\
+
+
+
+Ultimately, the deliverable demonstrated a tangible balance between high-speed query performance and robust data safety suitable for a large-scale healthcare environment.
 \end{itemize}
 
 \end{document}
