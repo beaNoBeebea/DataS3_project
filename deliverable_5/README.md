@@ -126,7 +126,8 @@ EXIT;
 ### Step 6: Import Database Schema
 You need to import the database schema file
 ```bash
-mysql -u mnhs_user -p mnhs_db < sql/schema.sql
+cd sql
+mysql -u mnhs_user -p mnhs_db < schema.sql
 ```
 If you need to import sample data:
 ```bash
@@ -136,6 +137,7 @@ mysql -u mnhs_user -p mnhs_db < sample_data.sql
 ### Step 7: Create Views
 Import all view definitions:
 ```bash
+cd views
 mysql -u mnhs_user -p mnhs_db < patient_next_visit.sql
 mysql -u mnhs_user -p mnhs_db < upcoming_by_hospital.sql
 mysql -u mnhs_user -p mnhs_db < drug_pricing_summary.sql
@@ -145,10 +147,12 @@ mysql -u mnhs_user -p mnhs_db < staff_workload_thirty.sql
 ### Step 8: Create Triggers
 Import all trigger definitions:
 ```bash
+cd ../triggers
 mysql -u mnhs_user -p mnhs_db < reject_double_booking.sql
 mysql -u mnhs_user -p mnhs_db < recompute_expense_total.sql
 mysql -u mnhs_user -p mnhs_db < prevent_bad_stock.sql
 mysql -u mnhs_user -p mnhs_db < protect_patient_delete.sql
+cd ..
 ```
 
 ### Step 9: Configure Environment Variables
@@ -165,7 +169,7 @@ Edit .env and add the following:
 ```env
 DB_HOST=localhost
 DB_PORT=3306
-DB_DATABASE=mnhs_db
+DB_DATABASE=MNHS
 DB_USERNAME=mnhs_user
 DB_PASSWORD=StrongPassword123!
 ```
@@ -218,7 +222,7 @@ For that, see the sql/example_queries & sql/testing folders
 
 
 
-e## 🐛 Troubleshooting
+## 🐛 Troubleshooting
 ## Common Issues
 ### Database Connection Failed
 - Check .env file exists and has correct values
